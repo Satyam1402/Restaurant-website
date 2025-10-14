@@ -1,4 +1,3 @@
-// Core Menu Item Interface
 export interface MenuItem {
   id: string;
   name: string;
@@ -47,7 +46,7 @@ export interface Address {
   zipCode: string;
   country: string;
   isDefault?: boolean;
-  label?: string; // 'Home', 'Work', etc.
+  label?: string; 
 }
 
 export interface UserPreferences {

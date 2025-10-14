@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Star, Clock, Flame, Leaf, Plus, Minus, ShoppingCart } from 'lucide-react';
 import type { MenuItem } from '../../../../types';
-import { useCart } from '../../../../context/CartContext';
+import { useAppDispatch } from '../../../../hooks/redux'; 
 import Modal from '../../../ui/Modal/Modal';
 import Button from '../../../ui/Button/Button';
+import { addItem } from '../../../../store/features/cart/cartSlice';
 
 interface MenuItemModalProps {
   item: MenuItem | null;
@@ -12,7 +13,7 @@ interface MenuItemModalProps {
 }
 
 const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, isOpen, onClose }) => {
-  const { addItem } = useCart();
+  const dispatch = useAppDispatch();
   const [quantity, setQuantity] = useState(1);
   const [selectedCustomizations, setSelectedCustomizations] = useState<string[]>([]);
   const [specialInstructions, setSpecialInstructions] = useState('');
@@ -35,8 +36,15 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, isOpen, onClose }) 
   };
 
   const handleAddToCart = () => {
-    addItem(item, quantity, selectedCustomizations);
+    // 🔥 Dispatch Redux action with all the details
+    dispatch(addItem({ 
+      menuItem: item, 
+      quantity,
+      customizations: selectedCustomizations
+    }));
+    
     onClose();
+    
     // Reset form
     setQuantity(1);
     setSelectedCustomizations([]);
@@ -99,7 +107,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, isOpen, onClose }) 
             )}
           </div>
 
-          {/* Additional Images (placeholder for future implementation) */}
+          {/* Additional Images Placeholder */}
           <div className="hidden lg:flex space-x-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -227,6 +235,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, isOpen, onClose }) 
                   onClick={() => handleQuantityChange(-1)}
                   disabled={quantity <= 1}
                   className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Decrease quantity"
                 >
                   <Minus size={16} />
                 </button>
@@ -235,6 +244,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, isOpen, onClose }) 
                   onClick={() => handleQuantityChange(1)}
                   disabled={quantity >= 10}
                   className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Increase quantity"
                 >
                   <Plus size={16} />
                 </button>

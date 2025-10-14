@@ -1,8 +1,9 @@
 import React from 'react';
 import { Star, Clock, Plus, Leaf, Flame } from 'lucide-react';
 import type { MenuItem } from '../../../../types';
-import { useCart } from '../../../../context/CartContext';
+import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import Button from '../../../ui/Button/Button';
+import { addItem } from '../../../../store/features/cart/cartSlice';
 
 interface MenuCardProps {
   item: MenuItem;
@@ -10,11 +11,21 @@ interface MenuCardProps {
 }
 
 const MenuCard: React.FC<MenuCardProps> = ({ item, onViewDetails }) => {
-  const { addItem, hasItem } = useCart();
+  const dispatch = useAppDispatch(); 
+  
+  // 🔥 Check if item exists in cart using Redux selector
+  const hasItemInCart = useAppSelector(state => 
+    state.cart.items.some(cartItem => cartItem.menuItem.id === item.id)
+  );
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addItem(item, 1);
+    // 🔥 Dispatch Redux action to add item
+    dispatch(addItem({ 
+      menuItem: item, 
+      quantity: 1,
+      customizations: [] // Default empty customizations
+    }));
   };
 
   const handleCardClick = () => {
@@ -42,7 +53,7 @@ const MenuCard: React.FC<MenuCardProps> = ({ item, onViewDetails }) => {
 
   return (
     <div 
-      className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer border border-gray-100"
+      className="w-full bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer border border-gray-100"
       onClick={handleCardClick}
     >
       {/* Image Section */}
@@ -135,7 +146,7 @@ const MenuCard: React.FC<MenuCardProps> = ({ item, onViewDetails }) => {
           size="sm"
         >
           <Plus size={16} className="mr-2" />
-          {hasItem(item.id) ? 'Add More' : 'Add to Cart'}
+          {hasItemInCart ? 'Add More' : 'Add to Cart'}
         </Button>
 
         {/* Review Count */}

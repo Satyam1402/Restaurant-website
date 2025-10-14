@@ -1,16 +1,56 @@
+// src/pages/Cart/Cart.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { useCart } from '../../context/CartContext';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import Button from '../../components/ui/Button/Button';
+import { clearCart, removeItem, updateQuantity } from '../../store/features/cart/cartSlice';
+
+
 
 const Cart: React.FC = () => {
-  const { items, total, itemCount, updateQuantity, removeItem, clearCart } = useCart();
+  const dispatch = useAppDispatch();
+
+  // 🔥 Get cart data from Redux store using selectors
+  const items = useAppSelector(state => state.cart.items);
+  const total = useAppSelector(state => state.cart.total);
+  const itemCount = useAppSelector(state => state.cart.itemCount);
+  const isLoading = useAppSelector(state => state.cart.isLoading);
 
   const deliveryFee = total > 50 ? 0 : 4.99;
   const tax = total * 0.08; // 8% tax
   const finalTotal = total + deliveryFee + tax;
 
+  // 🔥 Redux action handlers
+  const handleUpdateQuantity = (id: string, quantity: number) => {
+    if (quantity <= 0) {
+      dispatch(removeItem(id));
+    } else {
+      dispatch(updateQuantity({ id, quantity }));
+    }
+  };
+
+  const handleRemoveItem = (id: string) => {
+    dispatch(removeItem(id));
+  };
+
+  const handleClearCart = () => {
+    dispatch(clearCart());
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading cart...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty cart state
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20">
@@ -21,7 +61,7 @@ const Cart: React.FC = () => {
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Looks like you haven't added any delicious items to your cart yet. 
+              Looks like you haven't added any delicious items to your cart yet.
               Start exploring our menu!
             </p>
             <Link to="/menu">
@@ -41,8 +81,8 @@ const Cart: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <Link 
-              to="/menu" 
+            <Link
+              to="/menu"
               className="inline-flex items-center text-primary-600 hover:text-primary-700 transition-colors mb-2"
             >
               <ArrowLeft size={20} className="mr-2" />
@@ -52,9 +92,9 @@ const Cart: React.FC = () => {
               Your Order ({itemCount} item{itemCount !== 1 ? 's' : ''})
             </h1>
           </div>
-          
+
           <button
-            onClick={clearCart}
+            onClick={handleClearCart}
             className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
           >
             Clear Cart
@@ -84,15 +124,15 @@ const Cart: React.FC = () => {
                     <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                       {item.menuItem.description}
                     </p>
-                    
+
                     {/* Customizations */}
                     {item.customizations && item.customizations.length > 0 && (
                       <div className="mb-2">
                         <p className="text-xs text-gray-500 mb-1">Customizations:</p>
                         <div className="flex flex-wrap gap-1">
-                          {item.customizations.map((customization) => (
-                            <span 
-                              key={customization}
+                          {item.customizations.map((customization, index) => (
+                            <span
+                              key={index}
                               className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs"
                             >
                               {customization}
@@ -102,19 +142,29 @@ const Cart: React.FC = () => {
                       </div>
                     )}
 
+                    {/* Special Instructions */}
+                    {item.specialInstructions && (
+                      <div className="mb-2">
+                        <p className="text-xs text-gray-500 mb-1">Special Instructions:</p>
+                        <p className="text-sm text-gray-700 italic">{item.specialInstructions}</p>
+                      </div>
+                    )}
+
                     {/* Quantity Controls */}
                     <div className="flex items-center justify-between mt-4">
                       <div className="flex items-center space-x-3">
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                           className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-primary-500 transition-colors"
+                          aria-label="Decrease quantity"
                         >
                           <Minus size={14} />
                         </button>
                         <span className="w-8 text-center font-medium">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                           className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-primary-500 transition-colors"
+                          aria-label="Increase quantity"
                         >
                           <Plus size={14} />
                         </button>
@@ -125,8 +175,9 @@ const Cart: React.FC = () => {
                           ${item.totalPrice.toFixed(2)}
                         </span>
                         <button
-                          onClick={() => removeItem(item.id)}
-                          className="text-red-500 hover:text-red-700 transition-colors"
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="text-red-500 hover:text-red-700 transition-colors p-1"
+                          aria-label="Remove item"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -138,7 +189,7 @@ const Cart: React.FC = () => {
             ))}
           </div>
 
-          {/* Order Summary - FIXED SECTION */}
+          {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 sticky top-24">
               {/* Header */}
@@ -153,14 +204,14 @@ const Cart: React.FC = () => {
                     <span>Subtotal</span>
                     <span>${total.toFixed(2)}</span>
                   </div>
-                  
+
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery Fee</span>
                     <span className={deliveryFee === 0 ? 'text-green-600 font-medium' : ''}>
                       {deliveryFee === 0 ? 'FREE' : `$${deliveryFee.toFixed(2)}`}
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between text-gray-600">
                     <span>Tax</span>
                     <span>${tax.toFixed(2)}</span>
@@ -173,7 +224,7 @@ const Cart: React.FC = () => {
                     Add ${(50 - total).toFixed(2)} more for free delivery!
                   </div>
                 )}
-                
+
                 {/* Total */}
                 <div className="border-t border-gray-200 pt-3 mt-4">
                   <div className="flex justify-between text-lg font-bold text-gray-900">
@@ -183,12 +234,15 @@ const Cart: React.FC = () => {
                 </div>
               </div>
 
-              {/* Action Buttons - FIXED SPACING */}
+              {/* Action Buttons */}
               <div className="p-6 pt-0 space-y-3">
-                <Button className="w-full" size="lg">
-                  Proceed to Checkout
-                </Button>
-                
+                <Link to="/checkout" className="block">
+                  <Button className="w-full" size="lg">
+                    Proceed to Checkout
+                  </Button>
+                </Link>
+
+
                 <Link to="/menu" className="block">
                   <Button variant="outline" className="w-full" size="md">
                     Add More Items

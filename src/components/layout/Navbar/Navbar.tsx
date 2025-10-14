@@ -1,13 +1,23 @@
+// src/components/layout/Navbar/Navbar.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingCart, User, Phone } from 'lucide-react';
-import { useCart } from '../../../context/CartContext';
+import { useAppSelector, useAppDispatch } from '../../../hooks/redux';
 import Button from '../../ui/Button/Button';
+import { logout } from '../../../store/features/auth/authSlice';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { itemCount } = useCart();
+  
+  // 🔥 Get cart count from Redux store
+  const itemCount = useAppSelector(state => state.cart.itemCount);
+  
+  // 🔥 Safe auth state access with optional chaining and defaults
+  const isAuthenticated = useAppSelector(state => state.auth?.isAuthenticated || false);
+  const user = useAppSelector(state => state.auth?.user || null);
+  
+  const dispatch = useAppDispatch();
   const location = useLocation();
 
   useEffect(() => {
@@ -31,6 +41,11 @@ const Navbar: React.FC = () => {
     return location.pathname === path;
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    closeMenu();
+  };
+
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Menu', path: '/menu' },
@@ -40,8 +55,8 @@ const Navbar: React.FC = () => {
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200' 
+        isScrolled
+          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200'
           : 'bg-transparent'
       }`}
     >
@@ -87,6 +102,7 @@ const Navbar: React.FC = () => {
               <span className="text-sm font-medium">Call Us</span>
             </a>
 
+            {/* Cart Icon */}
             <Link to="/cart" className="relative">
               <div className="p-2 text-gray-700 hover:text-primary-500 transition-colors hover:scale-105 transform duration-150">
                 <ShoppingCart size={24} />
@@ -98,18 +114,34 @@ const Navbar: React.FC = () => {
               </div>
             </Link>
 
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="flex items-center space-x-2">
-                <User size={16} />
-                <span>Sign In</span>
-              </Button>
-            </Link>
+            {/* 🔥 Updated Auth Section - Shows user info if logged in */}
+            {isAuthenticated && user ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-700">Hi, {user.name}!</span>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-gray-600 hover:text-primary-600 transition-colors px-3 py-1 rounded-md border border-gray-300 hover:border-primary-300"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                  <User size={16} />
+                  <span>Sign In</span>
+                </Button>
+              </Link>
+            )}
 
-            <Button size="sm">Order Now</Button>
+            <Link to="/menu">
+              <Button size="sm">Order Now</Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-4">
+            {/* Cart icon for mobile */}
             <Link to="/cart" className="relative">
               <div className="p-2 text-gray-700 hover:text-primary-500 transition-colors">
                 <ShoppingCart size={24} />
@@ -150,7 +182,7 @@ const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
-            
+
             <div className="pt-4 border-t border-gray-200 space-y-4">
               <a
                 href="tel:+1234567890"
@@ -159,15 +191,34 @@ const Navbar: React.FC = () => {
                 <Phone size={20} />
                 <span>Call Us: +1 (234) 567-890</span>
               </a>
-              
+
               <div className="flex flex-col space-y-3 px-4">
-                <Link to="/auth" onClick={closeMenu}>
-                  <Button variant="outline" className="w-full justify-center">
-                    <User size={16} className="mr-2" />
-                    Sign In
-                  </Button>
+                {/* 🔥 Updated Mobile Auth Section */}
+                {isAuthenticated && user ? (
+                  <>
+                    <div className="text-center py-2">
+                      <span className="text-gray-700">Hi, {user.name}!</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-center"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <Link to="/auth" onClick={closeMenu}>
+                    <Button variant="outline" className="w-full justify-center">
+                      <User size={16} className="mr-2" />
+                      Sign In
+                    </Button>
+                  </Link>
+                )}
+                
+                <Link to="/menu" onClick={closeMenu}>
+                  <Button className="w-full justify-center">Order Now</Button>
                 </Link>
-                <Button className="w-full justify-center">Order Now</Button>
               </div>
             </div>
           </div>
