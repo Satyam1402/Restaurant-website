@@ -71,7 +71,7 @@ const Menu: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16">
+      {/* <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Menu</h1>
@@ -80,7 +80,7 @@ const Menu: React.FC = () => {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Content Container - FIXED WITH PROPER SPACING */}
       <div className="container mx-auto px-6 sm:px-8 lg:px-12 py-12 max-w-7xl">

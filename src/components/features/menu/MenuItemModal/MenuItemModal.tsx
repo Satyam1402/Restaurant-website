@@ -36,7 +36,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, isOpen, onClose }) 
   };
 
   const handleAddToCart = () => {
-    // 🔥 Dispatch Redux action with all the details
+    // Dispatch Redux action with all the details
     dispatch(addItem({ 
       menuItem: item, 
       quantity,

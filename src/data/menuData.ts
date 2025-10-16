@@ -50,7 +50,7 @@ export const menuItems: MenuItem[] = [
     name: 'Truffle Arancini',
     description: 'Crispy risotto balls stuffed with mozzarella and truffle oil, served with marinara sauce',
     price: 14.99,
-    image: 'https://images.unsplash.com/photo-1572441713132-51436dcfdb22?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     category: 'appetizers',
     dietary: ['vegetarian'],
     spiceLevel: 1,
