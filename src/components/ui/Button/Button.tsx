@@ -5,6 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
+  fullWidth?: boolean; // 👈 Add fullWidth prop
   children: ReactNode;
 }
 
@@ -12,6 +13,7 @@ const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
   loading = false,
+  fullWidth = false, // 👈 Add fullWidth with default false
   children,
   className = '',
   disabled,
@@ -32,9 +34,12 @@ const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-base',
   };
 
+  // 👈 Add width class logic
+  const widthClass = fullWidth ? 'w-full' : '';
+
   return (
     <button
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className} ${
+      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${widthClass} ${className} ${
         loading ? 'hover:scale-105' : 'hover:scale-102'
       } active:scale-95 transform transition-transform duration-150`}
       disabled={disabled || loading}
